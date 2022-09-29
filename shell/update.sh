@@ -254,7 +254,7 @@ update_qinglong() {
     primary_branch="${current_branch}"
   fi
   [[ -f $dir_root/package.json ]] && ql_depend_old=$(cat $dir_root/package.json)
-  reset_romote_url ${dir_root} "https://github.com/kangwenhang/baibai.git" ${primary_branch}
+  reset_romote_url ${dir_root} "https://github.com/kangwenhang/qinglong.git" ${primary_branch}
   git_pull_scripts $dir_root ${primary_branch}
 
   if [[ $exit_status -eq 0 ]]; then
