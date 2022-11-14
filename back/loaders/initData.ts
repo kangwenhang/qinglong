@@ -8,6 +8,7 @@ import groupBy from 'lodash/groupBy';
 import { DependenceModel } from '../data/dependence';
 import { Op } from 'sequelize';
 import config from '../config';
+import { CrontabViewModel } from '../data/cronView';
 
 export default async () => {
   const cronService = Container.get(CronService);
