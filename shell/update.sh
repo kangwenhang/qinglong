@@ -249,6 +249,12 @@ update_qinglong() {
     exit
   patch_version &>/dev/null
 
+  local mirror="github"
+  local githubStatus=$(curl -s -m 3 -IL "https://github.com" | grep 200)
+  if [ "$githubStatus" == "" ]; then
+    mirror="gitee"
+  fi
+  echo -e "\n使用 ${mirror} 源更新...\n"
   export isFirstStartServer=false
 
   local all_branch=$(git branch -a)
@@ -257,7 +263,7 @@ update_qinglong() {
     primary_branch="${current_branch}"
   fi
   [[ -f $dir_root/package.json ]] && ql_depend_old=$(cat $dir_root/package.json)
-  reset_romote_url ${dir_root} "https://github.com/kangwenhang/qinglong.git" ${primary_branch}
+  reset_romote_url ${dir_root} "https://${mirror}.com/kangwenhang/qinglong.git" ${primary_branch}
   git_pull_scripts $dir_root ${primary_branch}
 
   if [[ $exit_status -eq 0 ]]; then
@@ -278,7 +284,7 @@ update_qinglong() {
 update_qinglong_static() {
   local no_restart="$1"
   local primary_branch="$2"
-  local url="https://github.com/kangwenhang/qinglong-static.git"
+  local url="https://${mirror}.com/kangwenhang/qinglong-static.git"
   if [[ -d ${ql_static_repo}/.git ]]; then
     reset_romote_url ${ql_static_repo} ${url} ${primary_branch}
     git_pull_scripts ${ql_static_repo} ${primary_branch}
