@@ -22,7 +22,7 @@ Timed task management panel with python3, javaScript, shell, typescript support
 [docker-image-size-url]: https://hub.docker.com/r/whyour/qinglong
 </div>
 
-[![](https://user-images.githubusercontent.com/22700758/161788855-c4e51cb8-d4e9-44fe-bb17-ee1a56c8549b.png)](https://whyour.cn)
+[![](https://user-images.githubusercontent.com/22700758/203243067-1a8a570d-b1b4-4837-9f12-d78d83e31f35.jpg)](https://whyour.cn)
 
 [简体中文](./README.md) | English
 
@@ -41,7 +41,7 @@ Timed task management panel with python3, javaScript, shell, typescript support
 ### Local Deployment
 
 ```bash
-# To be completed
+# To be refined, see the development steps first (not supported on windows yet)
 ```
 
 ### Podman Deployment
@@ -160,7 +160,11 @@ task <file_path> now
 # the foreground does not generate the day, directly recorded in the log file, and can be specified account execution
 task <file_path> conc <env_name> <account_number>(Optional) 
 # Specify the account to execute and run immediately regardless of whether a random delay is set 
-task <file_path> desi <env_name> <account_number>         
+task <file_path> desi <env_name> <account_number>       
+# Set task timeout   
+task -m <max_time> <file_path>
+# Print task log in real time, no need to carry this parameter when creating timed tasks
+task -l <file_path>  
 ```
 
 2. parameter description
@@ -175,6 +179,7 @@ task <file_path> desi <env_name> <account_number>
 * file_path: File path for task execution
 * env_name: The name of the environment variable that needs to be concurrent or specified at the time of task execution
 * account_number: Specify the account number of an environment variable to be executed when the task is executed
+* max_time: Timeout, suffix "s" for seconds (default), "m" for minutes, "h" for hours, "d" for days
 
 ## Links
 
