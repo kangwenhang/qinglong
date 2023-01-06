@@ -41,9 +41,9 @@ RUN set -x \
     && git config --global user.name "qinglong" \
     && git config --global http.postBuffer 524288000 \
     && npm install -g pnpm \
-    && pnpm add -g pm2 ts-node typescript tslib \
-    && git clone -b ${QL_BRANCH} ${QL_URL} ${QL_DIR} \
-    && cd ${QL_DIR} \
+    && pnpm add -g pm2 ts-node typescript tslib
+
+COPY package.json .npmrc pnpm-lock.yaml ./
     && mkdir data \
     && cd data \
     && mkdir config log db scripts jbot deps raw repo \
@@ -56,6 +56,11 @@ RUN set -x \
     && ln -sf /${QL_DIR}/data/raw /${QL_DIR} \
     && ln -sf /${QL_DIR}/data/repo /${QL_DIR} \
     && ln -sf /${QL_DIR}/data/jbot /${QL_DIR} \
+RUN pnpm install
+
+COPY . .
+RUN git clone -b ${QL_BRANCH} ${QL_URL} ${QL_DIR} \
+    && cd ${QL_DIR} \
     && cp -f .env.example .env \
     && chmod 777 ${QL_DIR}/shell/*.sh \
     && chmod 777 ${QL_DIR}/docker/*.sh \
