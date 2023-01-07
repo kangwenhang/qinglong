@@ -43,7 +43,7 @@ RUN set -x \
     && npm install -g pnpm \
     && pnpm add -g pm2 ts-node typescript tslib
 
-COPY package.json .npmrc pnpm-lock.yaml ./
+COPY ../package.json ../.npmrc ../pnpm-lock.yaml ./
     && mkdir data \
     && cd data \
     && mkdir config log db scripts jbot deps raw repo \
