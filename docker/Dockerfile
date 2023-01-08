@@ -1,6 +1,9 @@
-FROM node:alpine as builder
+FROM python:3.10-alpine as builder
 COPY package.json .npmrc pnpm-lock.yaml /tmp/build/
-RUN npm i -g pnpm \
+RUN set -x \
+    && apk update \
+    && apk add nodejs npm \
+    && npm i -g pnpm \
     && cd /tmp/build \
     && pnpm install --prod
 
@@ -41,9 +44,6 @@ RUN set -x \
     && apk update \
     && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone \
-    && git config --global user.email "qinglong@@users.noreply.github.com" \
-    && git config --global user.name "qinglong" \
-    && git config --global http.postBuffer 524288000 \
     && mkdir data \
     && cd data \
     && mkdir config log db scripts jbot deps raw repo \
@@ -56,6 +56,9 @@ RUN set -x \
     && ln -sf /${QL_DIR}/data/raw /${QL_DIR} \
     && ln -sf /${QL_DIR}/data/repo /${QL_DIR} \
     && ln -sf /${QL_DIR}/data/jbot /${QL_DIR} \
+    && git config --global user.email "qinglong@@users.noreply.github.com" \
+    && git config --global user.name "qinglong" \
+    && git config --global http.postBuffer 524288000 \
     && npm install -g pnpm \
     && pnpm add -g pm2 ts-node typescript tslib \
     && rm -rf /root/.pnpm-store \
