@@ -1,3 +1,9 @@
+FROM node:alpine as builder
+COPY package.json .npmrc pnpm-lock.yaml /tmp/build/
+RUN npm i -g pnpm \
+    && cd /tmp/build \
+    && pnpm install --prod
+
 FROM python:3.10-alpine
 
 ARG QL_MAINTAINER="kangwenhang"
@@ -38,12 +44,6 @@ RUN set -x \
     && git config --global user.email "qinglong@@users.noreply.github.com" \
     && git config --global user.name "qinglong" \
     && git config --global http.postBuffer 524288000 \
-    && npm install -g pnpm \
-    && pnpm add -g pm2 ts-node typescript tslib \
-    && rm -rf /root/.pnpm-store \
-    && rm -rf /root/.local/share/pnpm/store \
-    && rm -rf /root/.cache \
-    && rm -rf /root/.npm
     && mkdir data \
     && cd data \
     && mkdir config log db scripts jbot deps raw repo \
@@ -56,6 +56,12 @@ RUN set -x \
     && ln -sf /${QL_DIR}/data/raw /${QL_DIR} \
     && ln -sf /${QL_DIR}/data/repo /${QL_DIR} \
     && ln -sf /${QL_DIR}/data/jbot /${QL_DIR} \
+    && npm install -g pnpm \
+    && pnpm add -g pm2 ts-node typescript tslib \
+    && rm -rf /root/.pnpm-store \
+    && rm -rf /root/.local/share/pnpm/store \
+    && rm -rf /root/.cache \
+    && rm -rf /root/.npm
 
 ARG SOURCE_COMMIT
 RUN git clone -b ${QL_BRANCH} ${QL_URL} ${QL_DIR} \
@@ -63,16 +69,12 @@ RUN git clone -b ${QL_BRANCH} ${QL_URL} ${QL_DIR} \
     && cp -f .env.example .env \
     && chmod 777 ${QL_DIR}/shell/*.sh \
     && chmod 777 ${QL_DIR}/docker/*.sh \
-    && pnpm install --prod \
-    && rm -rf /root/.pnpm-store \
-    && rm -rf /root/.local/share/pnpm/store \
-    && rm -rf /root/.cache \
-    && rm -rf /root/.npm \
     && git clone -b ${QL_BRANCH} https://github.com/${QL_MAINTAINER}/qinglong-static.git /static \
     && mkdir -p ${QL_DIR}/static \
     && cp -rf /static/* ${QL_DIR}/static \
-    && rm -rf /static \
-    && rm -rf /tmp/build
+    && rm -rf /static
+
+COPY --from=builder /tmp/build/node_modules/. /ql/node_modules/
 
 WORKDIR ${QL_DIR}
     
