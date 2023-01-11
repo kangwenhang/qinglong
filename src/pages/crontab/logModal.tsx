@@ -54,7 +54,7 @@ const CronLogModal = ({
             document
               .querySelector('#log-flag')!
               .scrollIntoView({ behavior: 'smooth' });
-          });
+          }, 1000);
           if (hasNext) {
             setTimeout(() => {
               getCronLog();
