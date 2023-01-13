@@ -1,4 +1,4 @@
-FROM python:3.8.13-alpine3.16
+FROM python:3.10-alpine
 
 ARG QL_MAINTAINER="kangwenhang"
 LABEL maintainer="${QL_MAINTAINER}"
