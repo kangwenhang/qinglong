@@ -1,4 +1,10 @@
-import React, { useCallback, useRef, useState, useEffect } from 'react';
+import React, {
+  useCallback,
+  useRef,
+  useState,
+  useEffect,
+  useMemo,
+} from 'react';
 import {
   Button,
   message,
@@ -33,6 +39,8 @@ import { useOutletContext } from '@umijs/max';
 import { SharedContext } from '@/layouts';
 import useTableScrollHeight from '@/hooks/useTableScrollHeight';
 import Copy from '../../components/copy';
+import { VList } from 'virtuallist-antd';
+
 const { Text } = Typography;
 const { Search } = Input;
 
@@ -57,50 +65,6 @@ enum OperationPath {
 }
 
 const type = 'DragableBodyRow';
-
-const DragableBodyRow = ({
-  index,
-  moveRow,
-  className,
-  style,
-  ...restProps
-}: any) => {
-  const ref = useRef();
-  const [{ isOver, dropClassName }, drop] = useDrop({
-    accept: type,
-    collect: (monitor) => {
-      const { index: dragIndex } = (monitor.getItem() as any) || {};
-      if (dragIndex === index) {
-        return {};
-      }
-      return {
-        isOver: monitor.isOver(),
-        dropClassName:
-          dragIndex < index ? ' drop-over-downward' : ' drop-over-upward',
-      };
-    },
-    drop: (item: any) => {
-      moveRow(item.index, index);
-    },
-  });
-  const [, drag] = useDrag({
-    type,
-    item: { index },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
-  drop(drag(ref));
-
-  return (
-    <tr
-      ref={ref}
-      className={`${className}${isOver ? dropClassName : ''}`}
-      style={{ cursor: 'move', ...style }}
-      {...restProps}
-    />
-  );
-};
 
 const Env = () => {
   const { headerStyle, isPhone, theme } = useOutletContext<SharedContext>();
@@ -359,7 +323,7 @@ const Env = () => {
 
   const handleCancel = (env?: any[]) => {
     setIsModalVisible(false);
-    env && handleEnv(env);
+    getEnvs();
   };
 
   const handleEditNameCancel = (env?: any[]) => {
@@ -367,28 +331,71 @@ const Env = () => {
     getEnvs();
   };
 
-  const handleEnv = (env: any) => {
-    const result = [...value];
-    const index = value.findIndex((x) => x.id === env.id);
-    if (index === -1) {
-      env = Array.isArray(env) ? env : [env];
-      result.push(...env);
-    } else {
-      result.splice(index, 1, {
-        ...env,
-      });
-    }
-    setValue(result);
+  const vComponents = useMemo(() => {
+    return VList({
+      height: tableScrollHeight!,
+      resetTopWhenDataChange: false,
+    });
+  }, [tableScrollHeight]);
+
+  const DragableBodyRow = (props: any) => {
+    const { index, moveRow, className, style, ...restProps } = props;
+    const ref = useRef();
+    const [{ isOver, dropClassName }, drop] = useDrop({
+      accept: type,
+      collect: (monitor) => {
+        const { index: dragIndex } = (monitor.getItem() as any) || {};
+        if (dragIndex === index) {
+          return {};
+        }
+        return {
+          isOver: monitor.isOver(),
+          dropClassName:
+            dragIndex < index ? ' drop-over-downward' : ' drop-over-upward',
+        };
+      },
+      drop: (item: any) => {
+        moveRow(item.index, index);
+      },
+    });
+    const [, drag] = useDrag({
+      type,
+      item: { index },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+    });
+
+    useEffect(() => {
+      drop(drag(ref));
+    }, [drag, drop]);
+
+    const components = useMemo(() => vComponents.body.row, []);
+
+    const tempProps = useMemo(() => {
+      return {
+        ref: ref,
+        className: `${className}${isOver ? dropClassName : ''}`,
+        style: { cursor: 'move', ...style },
+        ...restProps,
+      };
+    }, [className, dropClassName, restProps, style, isOver]);
+
+    return <> {components(tempProps, ref)} </>;
   };
 
-  const components = {
-    body: {
-      row: DragableBodyRow,
-    },
-  };
+  const components = useMemo(() => {
+    return {
+      ...vComponents,
+      body: {
+        ...vComponents.body,
+        row: DragableBodyRow,
+      },
+    };
+  }, [vComponents]);
 
   const moveRow = useCallback(
-    (dragIndex, hoverIndex) => {
+    (dragIndex: number, hoverIndex: number) => {
       if (dragIndex === hoverIndex) {
         return;
       }
